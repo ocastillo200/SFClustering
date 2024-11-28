@@ -25,7 +25,7 @@ def generate_new_data(decoder, scaler, latent_dim, num_samples, output_files):
     generated_data = decoder.predict(random_latent_vectors)
 
     generated_data_noisy = add_output_noise(generated_data, noise_factor=0.95)
-    
+
     # Desescalar los datos generados
     generated_data_rescaled = scaler.inverse_transform(generated_data_noisy)
     
