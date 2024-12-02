@@ -1,24 +1,25 @@
 from load_data import load_and_preprocess_data
-from autoencoder import build_autoencoder, build_autoencoder_with_lstm
+from autoencoder import build_autoencoder
 from train import train_autoencoder
 from generate_data import generate_new_data
 from tensorflow.keras.models import load_model
 import os
 import numpy as np
 
-file_paths = ["../../data/normal/BER.csv", "../../data/normal/InputPower.csv", "../../data/normal/OSNR.csv"]
-output_files = ["../../data/generated/generated_BER.csv", "../../data/generated/generated_InputPower.csv", "../../data/generated/generated_OSNR.csv"]
+file_paths = ["../../data/normal/BER.csv", "../../data/normal/OSNR.csv", "../../data/normal/InputPower.csv"]
+output_files = ["../../data/generated/generated_BER.csv", "../../data/generated/generated_OSNR.csv", "../../data/generated/generated_InputPower.csv"]
 
-file_paths_anomaly_IASEN = ["../../data/anomaly/BER_IASEN.csv", "../../data/anomaly/InputPower_IASEN.csv", "../../data/anomaly/OSNR_IASEN.csv" ]
-output_files_anomaly_IASEN = ["../../data/generated/generated_BER_Anomaly_IASEN.csv", "../../data/generated/generated_InputPower_Anomaly_IASEN.csv", "../../data/generated/generated_OSNR_Anomaly_IASEN.csv"]
+file_paths_anomaly_IASEN = ["../../data/anomaly/BER_IASEN.csv", "../../data/anomaly/OSNR_IASEN.csv", "../../data/anomaly/InputPower_IASEN.csv" ]
+output_files_anomaly_IASEN = ["../../data/generated/generated_BER_Anomaly_IASEN.csv", "../../data/generated/generated_OSNR_Anomaly_IASEN.csv", "../../data/generated/generated_InputPower_Anomaly_IASEN.csv"]
 
-file_paths_anomaly_Filter = ["../../data/anomaly/BER_Filtro.csv", "../../data/anomaly/InputPower_Filtro.csv", "../../data/anomaly/OSNR_Filtro.csv"]
-output_files_anomaly_Filter = ["../../data/generated/generated_BER_Anomaly_Filter.csv", "../../data/generated/generated_InputPower_Anomaly_Filter.csv", "../../data/generated/generated_OSNR_Anomaly_Filter.csv"]
+file_paths_anomaly_Filter = ["../../data/anomaly/BER_Filtro.csv", "../../data/anomaly/OSNR_Filtro.csv", "../../data/anomaly/InputPower_Filtro.csv"]
+output_files_anomaly_Filter = ["../../data/generated/generated_BER_Anomaly_Filter.csv", "../../data/generated/generated_OSNR_Anomaly_Filter.csv", "../../data/generated/generated_InputPower_Anomaly_Filter.csv"]
 
+file_path_anomalies = ["../../data/dataset_anomaly_Filter.csv", "../../data/dataset_anomaly_IASEN.csv"]
 
 # Hiperparámetros
-latent_dim = 32
-num_samples = 2000
+latent_dim = 64
+num_samples = 1000
 epochs = 1000
 batch_size = 32
 model_file = 'autoencoder_model.keras'
@@ -59,7 +60,8 @@ if not anomaly:
         std_originals.append(std_original)
         clean_name = os.path.basename(file_path)
         print(f"Desviación estándar de los datos originales para {clean_name}: {std_original}")
-    generate_new_data(decoder, scaler, latent_dim, num_samples, output_files)
+    anomalies = generate_new_data(decoder, scaler, latent_dim, num_samples, output_files, anomalies=file_path_anomalies)
+    print(f"Datos generados con {anomalies} anomalías introducidas.")
     for i, output_file in enumerate(output_files):
         generated_data = np.genfromtxt(output_file, delimiter=',')  
         std_generated = np.std(generated_data)  
