@@ -1,5 +1,5 @@
 from tensorflow.keras import Model, Sequential
-from tensorflow.keras.layers import Input, Dense
+from tensorflow.keras.layers import Input, Dense, LSTM, RepeatVector
 
 def build_autoencoder(input_dim, latent_dim):
     """
@@ -25,13 +25,10 @@ def build_autoencoder(input_dim, latent_dim):
     # Capas del decodificador
     latent_inputs = Input(shape=(latent_dim,), name="decoder_input")
     decoder_layer_1 = Dense(128, activation="relu")(latent_inputs)
-    # Cambiar la última capa para que produzca el tamaño correcto
     decoder_output = Dense(input_dim, activation="sigmoid")(decoder_layer_1)  # Esto asegura que la salida tenga tamaño input_dim (225)
     
     # Construir el modelo decodificador
     decoder = Model(latent_inputs, decoder_output, name="decoder")
-
-    # Conectar codificador y decodificador en el autoencoder completo
     autoencoder = Model(inputs, decoder(encoder(inputs)), name="autoencoder")
 
     return autoencoder, encoder, decoder
