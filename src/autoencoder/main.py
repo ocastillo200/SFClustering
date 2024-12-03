@@ -15,11 +15,11 @@ output_files_anomaly_IASEN = ["../../data/generated/generated_BER_Anomaly_IASEN.
 file_paths_anomaly_Filter = ["../../data/anomaly/BER_Filtro.csv", "../../data/anomaly/OSNR_Filtro.csv", "../../data/anomaly/InputPower_Filtro.csv"]
 output_files_anomaly_Filter = ["../../data/generated/generated_BER_Anomaly_Filter.csv", "../../data/generated/generated_OSNR_Anomaly_Filter.csv", "../../data/generated/generated_InputPower_Anomaly_Filter.csv"]
 
-file_path_anomalies = ["../../data/dataset_anomaly_Filter.csv", "../../data/dataset_anomaly_IASEN.csv"]
+file_path_anomalies = ["../../data/anomaly/dataset_anomaly_Filter.csv", "../../data/anomaly/dataset_anomaly_IASEN.csv"]
 
 # Hiperparámetros
 latent_dim = 64
-num_samples = 1000
+num_samples = 500
 epochs = 1000
 batch_size = 32
 model_file = 'autoencoder_model.keras'

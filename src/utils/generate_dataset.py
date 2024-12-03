@@ -34,12 +34,6 @@ def generate_dataset(file1, file2, file3, output_type="normal"):
     
     print(f"Dataset generado y guardado como: {os.path.basename(output_filename)}")
 
-file1 = "../../data/anomaly/BER_IASEN.csv"  
-file2 = "../../data/anomaly/OSNR_IASEN.csv" 
-file3 = "../../data/anomaly/InputPower_IASEN.csv"  
-
-generate_dataset(file1, file2, file3, output_type="anomaly")
-
 # Create a dataset with real data from SoftFailure_dataset.csv (https://github.com/Network-And-Services/optical-failure-dataset)
 
 def clean_and_split_csv(input_csv):
