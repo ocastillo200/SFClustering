@@ -72,7 +72,7 @@ for file_path in file_paths:
     for cluster, color in cluster_color_map.items():
         cluster_data = data[data["DBSCAN_Cluster"] == cluster]
         marker = "x" if cluster == -1 else "o"  # Diferenciar ruido con 'x'
-        plt.scatter(cluster_data["InputPower"], cluster_data["OSNR"], c=[color], label=f"Cluster {cluster}", marker=marker, s=10)
+        plt.scatter(cluster_data["BER"], cluster_data["OSNR"], c=[color], label=f"Cluster {cluster}", marker=marker, s=10)
     plt.title(f"Clasificación por DBSCAN ({name})")
     plt.xlabel("Input Power")
     plt.ylabel("OSNR")
@@ -80,9 +80,9 @@ for file_path in file_paths:
 
     # Gráfico de etiquetas reales
     plt.subplot(1, 2, 2)
-    plt.scatter(data["InputPower"], data["OSNR"], c=data["Failures"], cmap="viridis", s=10)
+    plt.scatter(data["BER"], data["OSNR"], c=data["Failures"], cmap="viridis", s=10)
     plt.title(f"Etiquetas reales (Failures) ({name})")
-    plt.xlabel("Input Power")
+    plt.xlabel("BER")
     plt.ylabel("OSNR")
     plt.colorbar(label="Failures")
 

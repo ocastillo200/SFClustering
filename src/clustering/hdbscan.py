@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 #file_paths = ["../../data/dataset_real.csv"]
-file_paths = ["../../data/dataset_generated.csv"]
+file_paths = ["../../data/dataset_generated2.csv"]
 features = ["BER", "OSNR", "InputPower"]
 
 for file_path in file_paths:

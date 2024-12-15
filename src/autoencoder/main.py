@@ -19,10 +19,10 @@ file_path_anomalies = ["../../data/anomaly/dataset_anomaly_Filter.csv", "../../d
 
 # Hiperparámetros
 latent_dim = 64
-num_samples = 500
+num_samples = 2000
 epochs = 1000
 batch_size = 32
-model_file = 'autoencoder_model.keras'
+model_file = 'models/autoencoder_model.keras'
 anomaly = False
 anomaly_type = 2
 

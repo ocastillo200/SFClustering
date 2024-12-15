@@ -69,5 +69,6 @@ def clean_and_split_csv(input_csv):
 
     print("Archivo generado con éxito: 'Device_with_InputPower.csv' ")
 
-input_csv = '../../data/labeled/SoftFailure_dataset.csv'
-clean_and_split_csv(input_csv)
+#input_csv = '../../data/labeled/SoftFailure_dataset.csv'
+#clean_and_split_csv(input_csv)
+generate_dataset("../../data/normal/BER.csv", "../../data/normal/OSNR.csv", "../../data/normal/InputPower.csv", "normal")
