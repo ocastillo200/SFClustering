@@ -26,9 +26,9 @@ def HDBSCAN_latent_space(encoder, data, scaler, block_size, features, file_path)
     latent_scaler = StandardScaler()
     latent_scaled = latent_scaler.fit_transform(latent_data)
 
-    min_cluster_size = 2
+    min_cluster_size = 5
     min_samples = 2
-    epsilon = 2
+    epsilon = 0.5
 
     tracemalloc.start()
     snapshot_start = tracemalloc.take_snapshot()

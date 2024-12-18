@@ -13,9 +13,8 @@ import matplotlib.pyplot as plt
 import time
 
 def preprocess_data(data):
-  
-    if 'BER' in data.columns:
-        data['BER'] = data['BER'] * 1e6  
+    if 'BER' in data.columns and 'Failures' in data.columns:
+        data['BER'] = data.apply(lambda row: row['BER'] * (1e2 if row['Failures'] == 1 else 1), axis=1)
     return data
 
 def check_data_consistency(data, block_size):
@@ -26,7 +25,7 @@ def check_data_consistency(data, block_size):
 
 def load_and_split_data(file_path):
     data = pd.read_csv(file_path)
-    features = ["BER", "OSNR", "InputPower"]
+    features = ["BER", "OSNR", "InputPower", "Failures"]
     data = data[features]
     return data
 
@@ -94,6 +93,7 @@ def main(file_path, block_size, latent_dim, epochs, batch_size):
     else:
         model_file = 'models/autoencoder_model_generated.keras'
         encoder_file = 'models/encoder_model_generated.keras'
+    data = data.drop(columns=['Failures'])
     scaler = MinMaxScaler()
     scaled_data = scaler.fit_transform(data)
     check_data_consistency(scaled_data, block_size)
