@@ -7,9 +7,10 @@ import time
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import tracemalloc
 
-#file_paths = ["../../data/dataset_real.csv"]
-file_paths = ["../../data/dataset_generated2.csv"]
+file_paths = ["../../data/dataset_real.csv"]
+#file_paths = ["../../data/dataset_generated.csv"]
 features = ["BER", "OSNR", "InputPower"]
 
 for file_path in file_paths:
@@ -22,11 +23,18 @@ for file_path in file_paths:
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
 
+    tracemalloc.start()
+    snapshot_start = tracemalloc.take_snapshot()
+
     start_time = time.time()
-    cure_instance = cure(X_scaled, 30, 10)  
+    cure_instance = cure(X_scaled, 2, 1)  
     cure_instance.process()
     clusters = cure_instance.get_clusters() 
     end_time = time.time() 
+
+    snapshot_end = tracemalloc.take_snapshot()
+    stats = snapshot_end.compare_to(snapshot_start, 'lineno')
+    total_memory_used = sum(stat.size_diff for stat in stats)
 
     labels = [-1] * len(X)  
     for cluster_id, cluster in enumerate(clusters):
@@ -54,16 +62,14 @@ for file_path in file_paths:
     print(f"CURE detectó {len(clusters)} clústeres en {name}.")
     print(f"CURE detectó {labels.count(-1)} puntos de ruido.")
     print(f"Tiempo de ejecución: {end_time - start_time:.2f} segundos\n")
+    print(f"CURE utilizó aproximadamente {total_memory_used / 1024:.2f} KB de memoria.")
 
     plt.figure(figsize=(12, 6))
-
-    # Crear un mapa de colores para los clusters
     unique_clusters = sorted(data["CURE_Cluster"].unique())
     colors = plt.cm.tab10(np.linspace(0, 1, len(unique_clusters)))
     cluster_color_map = {cluster: color for cluster, color in zip(unique_clusters, colors)}
 
-
-    # Gráfico de clústeres
+    # BER vs InputPower
     plt.subplot(1, 2, 1)
     for cluster, color in cluster_color_map.items():
         cluster_data = data[data["CURE_Cluster"] == cluster]
@@ -85,7 +91,7 @@ for file_path in file_paths:
     plt.tight_layout()
     plt.show()
 
-    # Gráfico de clústeres
+    # BER vs OSNR
     plt.subplot(1, 2, 1)
     for cluster, color in cluster_color_map.items():
         cluster_data = data[data["CURE_Cluster"] == cluster]
@@ -107,7 +113,7 @@ for file_path in file_paths:
     plt.tight_layout()
     plt.show()
 
-    # Gráfico de clústeres
+    # Input Power vs. OSNR
     plt.subplot(1, 2, 1)
     for cluster, color in cluster_color_map.items():
         cluster_data = data[data["CURE_Cluster"] == cluster]
@@ -118,7 +124,7 @@ for file_path in file_paths:
     plt.ylabel("OSNR")
     plt.legend(loc="best", fontsize="small")
 
-    # Gráfico de etiquetas reales
+    # Etiquetas reales
     plt.subplot(1, 2, 2)
     plt.scatter(data["InputPower"], data["OSNR"], c=data["Failures"], cmap="viridis", s=10)
     plt.title(f"Etiquetas reales (Failures) ({name})")

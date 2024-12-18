@@ -1,0 +1,96 @@
+import pandas as pd
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from pyclustering.cluster.cure import cure
+import numpy as np
+import matplotlib.pyplot as plt
+from tensorflow.keras.models import load_model
+import tracemalloc
+import time
+
+def CURE_latent_space(encoder, data, scaler, block_size, features, file_path):
+    scaled_data = scaler.transform(data[features])
+
+    num_features = len(features)
+    expected_size = (len(scaled_data) // block_size) * block_size
+    scaled_data = scaled_data[:expected_size, :]
+    data = data.iloc[:expected_size]
+
+    scaled_data_flat = scaled_data.reshape(-1, block_size * num_features)
+
+    latent_data = encoder(scaled_data_flat).numpy()
+
+    latent_scaler = StandardScaler()
+    latent_scaled = latent_scaler.fit_transform(latent_data)
+
+    num_representative_points = 2  
+    num_clusters = 12     
+
+    tracemalloc.start()
+    snapshot_start = tracemalloc.take_snapshot()
+
+    start_time = time.time()
+    cure_instance = cure(latent_scaled, num_clusters, num_representative_points)
+    cure_instance.process()
+    clusters = cure_instance.get_clusters()
+    end_time = time.time()
+
+    snapshot_end = tracemalloc.take_snapshot()
+    stats = snapshot_end.compare_to(snapshot_start, 'lineno')
+    total_memory_used = sum(stat.size_diff for stat in stats)
+
+    labels = [-1] * len(latent_scaled)
+    for cluster_id, cluster in enumerate(clusters):
+        for index in cluster:
+            labels[index] = cluster_id
+
+    cluster_sizes = [len(cluster) for cluster in clusters]
+    densest_cluster = np.argmax(cluster_sizes)
+    cluster_labels = {cluster: (0 if cluster == densest_cluster else 1) for cluster in range(len(clusters))}
+    cluster_labels[-1] = 1
+
+    block_predictions = np.array([cluster_labels[label] for label in labels])
+    reconstructed_labels = np.repeat(block_predictions, block_size)[:len(data)]
+
+    if "Failures" in data.columns:
+        y_true = data["Failures"].values
+        y_pred = reconstructed_labels
+
+        accuracy = accuracy_score(y_true, y_pred)
+        precision = precision_score(y_true, y_pred)
+        recall = recall_score(y_true, y_pred)
+        f1score = f1_score(y_true, y_pred)
+
+        # Resultados
+        print(f"Resultados para {file_path}:")
+        print(f"- Clusters detectados: {len(clusters)}")
+        print(f"- Cluster más denso: {densest_cluster} (tamaño: {cluster_sizes[densest_cluster]})")
+        print(f"- Tiempo de ejecución: {end_time - start_time:.2f} segundos")
+        print(f"- Precisión (Accuracy): {accuracy:.3f}")
+        print(f"- Precisión (Precision): {precision:.3f}")
+        print(f"- Sensibilidad (Recall): {recall:.3f}")
+        print(f"- F1-Score: {f1score:.3f}")
+        print(f"CURE utilizó aproximadamente {total_memory_used / 1024:.2f} KB de memoria.")
+
+    plt.figure(figsize=(12, 6))
+    for cluster_id, cluster in enumerate(clusters):
+        cluster_data = latent_data[cluster]
+        plt.scatter(cluster_data[:, 0], cluster_data[:, 1], label=f"Cluster {cluster_id}", s=10)
+    plt.title("Clusters en el espacio latente (CURE)")
+    plt.xlabel("Latent Dimension 1")
+    plt.ylabel("Latent Dimension 2")
+    plt.legend(loc="best", fontsize="small")
+    plt.show()
+
+# Ejemplo de uso
+file = "../../data/dataset_real.csv"
+data = pd.read_csv(file)
+if 'Failures' not in data.columns:
+    raise ValueError("El dataset debe contener la columna 'Failures'.")
+features = ["BER", "OSNR", "InputPower"]
+block_size = 100
+scaler = MinMaxScaler()
+data[features] = scaler.fit_transform(data[features])
+encoder = load_model('../autoencoder/models/encoder_model_normalized_real.keras')
+
+CURE_latent_space(encoder, data, scaler, block_size, features, file)
